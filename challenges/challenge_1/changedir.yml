@@ -1,4 +1,5 @@
 ---
+# doesn't actually work, changing directory is only for the CURRENT command, not persistently
 - hosts: local
   tasks:
     - name: send working directory to register

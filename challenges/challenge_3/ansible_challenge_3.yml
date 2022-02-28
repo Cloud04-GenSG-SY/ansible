@@ -1,0 +1,5 @@
+---
+# getting started
+- hosts: local
+  tasks:
+    - name: the beginning
