@@ -1,5 +1,5 @@
 ---
-# NOT WORKING YET
+# WORKING NOW
 
 - hosts: local
   # adding users, need elevated permissions
