@@ -1,4 +1,5 @@
 ---
+#NOT WORKING YET
 # figure out how to have a list of names in variable (just put it all in a string??)
 - hosts: local
   tasks: 
