@@ -1,4 +1,5 @@
 ---
+# you may also need my ansible.cfg file
 - hosts: local
   tasks:
     - name: setup tasks
