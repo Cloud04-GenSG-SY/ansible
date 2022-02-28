@@ -121,8 +121,8 @@
     
     # Remove test3.txt in ~/Report/
     # Create new file done.txt
-    - name: delete tasks
-      tags: rename
+    - name: remove tasks
+      tags: remove
       block:
         - name:
           command: rm test3.txt
