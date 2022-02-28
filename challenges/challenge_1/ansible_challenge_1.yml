@@ -1,0 +1,137 @@
+---
+- hosts: local
+  tasks:
+    - name: setup tasks
+      tags: setup
+      block:
+      - name: send working directory to register
+        command: pwd
+        register: printout
+      - name: print working directory
+        debug:
+          var: printout["stdout"]
+      # absent deletes recursively
+      - name: cleanup Practice directory if it exists
+        file:
+          path: ./Practice
+          state: absent
+      - name: cleanup Report directory if it exists
+        file:
+          path: ./Report
+          state: absent
+
+    # WARNING: Creates all these things in the current directory the playbook is being run in
+    - name: create tasks
+      tags: create
+      block: 
+        - name: create Practice directory
+          command: mkdir Practice
+        # ansible has no concept of current working directory apparently
+        # chdir only changes to the directory for the CURRENT command
+        # https://stackoverflow.com/questions/19369931/ansible-how-to-change-active-directory-in-ansible-playbook
+        - name: check it's created
+          command: pwd
+          args:
+            chdir: Practice
+          register: printout
+        - name: print debug text
+          debug:
+            var: printout["stdout"]
+        
+        - name: create Test directory
+          command: mkdir Test
+          args:
+            chdir: Practice
+          register: printout
+        - name: check it's created
+          command: pwd
+          args:
+            chdir: Practice/Test
+          register: printout
+        - name: print debug text
+          debug:
+            var: printout["stdout"]
+        
+        - name: create file in Test directory
+          command: "touch {{ item }}.txt"
+          args:
+            chdir: Practice/Test
+          loop:
+            - test1
+            - test2
+            - test3
+        - name: check they're created
+          command: ls
+          args:
+            chdir: Practice/Test
+          register: printout
+        - name: print debug text
+          debug:
+            var: printout["stdout"]
+        - name: send output to test1
+          lineinfile:
+            path: ./Practice/Test/test1.txt
+            line: This is the first file
+        - name: send output to test2
+          lineinfile:
+            path: ./Practice/Test/test2.txt
+            line: Something different
+        - name: send output to test3
+          lineinfile:
+            path: ./Practice/Test/test3.txt
+            line: Final TEST
+        
+        - name: create Report
+          command: mkdir Report
+        - name: check it's created
+          command: pwd
+          args:
+            chdir: Report
+          register: printout
+        - name: print debug text
+          debug:
+            var: printout["stdout"]
+    
+    # Copy ~/Practice/Test to ~/Report/.
+    - name: copy tasks
+      tags: copy
+      block:
+        - name: copy ./Practice/Test to ./Report/
+          copy:
+            src: ./Practice/Test/
+            dest: ./Report/
+        - name: check they've been copied
+          command: ls
+          args:
+            chdir: Report
+          register: printout
+        - name: print debug text
+          debug:
+            var: printout["stdout"]
+    
+    # Rename ~/Report/test2.txt to ~/Report/differenttext.txt.
+    - name: rename tasks
+      tags: rename
+      block:
+        - name:
+          command: mv test2.txt differenttext.txt
+          args:
+            chdir: Report
+    
+    # Remove test3.txt in ~/Report/
+    # Create new file done.txt
+    - name: delete tasks
+      tags: rename
+      block:
+        - name:
+          command: rm test3.txt
+          args:
+            chdir: Report
+        - name:
+          command: touch done.txt
+          args:
+            chdir: Report
+        - name:
+          lineinfile:
+            path: ./Report/done.txt
+            line: FINALLY D O N E

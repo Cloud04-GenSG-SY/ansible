@@ -1,0 +1,8 @@
+---
+# figure out how to have a list of names in variable (just put it all in a string??)
+- hosts: local
+  tasks: 
+  - name: add users iteratively
+    # this line needs editing
+    shell: for i in {{ user_names }}; do something; done
+    

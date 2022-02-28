@@ -1,0 +1,19 @@
+---
+- hosts: local
+  tasks:
+    - name: send working directory to register
+      command: pwd
+      register: printout
+    - name: actually print working directory
+      debug:
+        var: printout["stdout"]
+    - name: make a new directory
+      command: mkdir newfolder
+    - name: try to change to it
+      command: pwd
+      args:
+        chdir: newfolder
+      register: printout
+    - name: actually print working directory
+      debug:
+        var: printout["stdout"]
