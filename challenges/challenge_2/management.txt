@@ -1,0 +1,5 @@
+managers:
+- zoe
+- michael
+- freddie
+

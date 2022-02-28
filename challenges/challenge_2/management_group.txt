@@ -1,0 +1,5 @@
+managers_group:
+- corpo_management
+- corpo_sales
+- corpo_operations
+

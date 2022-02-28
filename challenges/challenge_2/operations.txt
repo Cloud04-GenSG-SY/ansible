@@ -1,0 +1,7 @@
+operations:
+- alice
+- zoe
+- michael
+- mike
+- freddie
+

@@ -1,9 +1,102 @@
 ---
-#NOT WORKING YET
-# figure out how to have a list of names in variable (just put it all in a string??)
+# NOT WORKING YET
+
 - hosts: local
+  # adding users, need elevated permissions
+  # remember to add -K flag when running ansible-playbook
+  become: yes
+  
+  # assumes files in same directory as playbook
+  vars_files:
+    - user-list.txt
+    - group-list.txt
+    - management.txt
+    - management_group.txt
+    - sales.txt
+    - sales_group.txt
+    - operations.txt
+    - operations_group.txt
+
+  # define some constants for user IDs and group IDs
+  vars:
+    starting_id: 2000
+    grep_string: "200*"
+  
   tasks: 
-  - name: add users iteratively
-    # this line needs editing
-    shell: for i in {{ user_names }}; do something; done
-    
+  - name: setup tasks
+    tags: setup
+    block:
+    - name: delete users iteratively
+      user:
+        # "{{ item }}" is syntax assumed by ansible...?
+        name: "{{ item }}"
+        state: absent
+      # user-list.txt must follow the format "user_list: \n- [name]\n- [name2]..."
+      # other files must also follow strict format given or playbook needs to be changed
+      # TODO?: Make this part more variable..??? Sounds very difficult 3:
+      loop: "{{ user_list }}"
+    - name: delete groups iteratively
+      group:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ group_list }}"
+
+  - name: creation tasks
+    tags: creation
+    block:
+    - name: create users iteratively
+      user:
+        name: "{{ item }}"
+        # when using multiple variables, don't have to keep writing curly braces, just put the name
+        uid: "{{ starting_id + my_index }} "
+      loop: "{{ user_list }}"
+      loop_control:
+        # 0-indexed index counter variable provided by ansible that goes into the uid above
+        index_var: my_index
+    - name: create groups iteratively
+      group:
+        name: "{{ item }}"
+        # group ids not defined as default linux behaviour seems to be to begin from 1 after the highest assigned id
+      loop: "{{ group_list }}"
+
+  - name: assignment tasks
+    tags: assignment
+    block:
+    - name: add managers to groups
+      user:
+        name: "{{ item[0] }}"
+        append: yes
+        groups: "{{ item[1] }}"
+      # nested for loop with ansible
+      # two lists, managers and managers_group
+      # product filter
+      # list filter
+      loop: "{{ managers | product(managers_group) | list }}"
+    - name: 
+      user:
+        name: "{{ item[0] }}"
+        append: yes
+        groups: "{{ item[1] }}"
+      loop: "{{ operations | product(operations_group) | list }}"
+    - name:
+      user:
+        name: "{{ item[0] }}"
+        append: yes
+        groups: "{{ item[1] }}"
+      loop: "{{ sales | product(sales_group) | list }}"
+
+  - name: checking tasks
+    tags: checking
+    block:
+    - name: ensure users were added
+      shell: "cat /etc/passwd | grep {{ grep_string }}"
+      register: printout
+    - name: print lines
+      debug:
+        var: printout["stdout_lines"]
+    - name: ensure users were added
+      shell: "cat /etc/group | grep {{ grep_string }}"
+      register: printout
+    - name: print lines
+      debug:
+        var: printout["stdout_lines"]

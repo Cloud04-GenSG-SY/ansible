@@ -68,7 +68,7 @@
           register: printout
         - name: print debug text
           debug:
-            var: printout["stdout"]
+            var: printout["stdout_lines"]
         - name: send output to test1
           lineinfile:
             path: ./Practice/Test/test1.txt
@@ -108,7 +108,7 @@
           register: printout
         - name: print debug text
           debug:
-            var: printout["stdout"]
+            var: printout["stdout_lines"]
     
     # Rename ~/Report/test2.txt to ~/Report/differenttext.txt.
     - name: rename tasks
@@ -136,3 +136,11 @@
           lineinfile:
             path: ./Report/done.txt
             line: FINALLY D O N E
+        - name: check remove step is done
+          command: ls
+          args:
+            chdir: Report
+          register: printout
+        - name: print debug text
+          debug:
+            var: printout["stdout_lines"]
